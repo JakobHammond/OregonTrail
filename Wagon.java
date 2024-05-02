@@ -1,6 +1,7 @@
 
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * @author Anthony Parker
@@ -215,6 +216,19 @@ public class Wagon {
 		if(party.isEmpty()) return true;
 		else return false;
 	}
+	
+	public Item getRandomItem() {
+		Random rnd = new Random();
+		int i = rnd.nextInt(inventory.size());
+		return inventory.get(i);
+	}
+
+	public Passenger getRandomPassenger() {
+		Random rnd = new Random();
+		int i = rndnextInt(party.size());
+		return party.get(i);
+	}
+
 	
 
 }
