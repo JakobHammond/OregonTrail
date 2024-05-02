@@ -1,7 +1,6 @@
 
 
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * @author Anthony Parker
@@ -14,46 +13,31 @@ import java.util.Random;
 public class Wagon {
 	
 	private ArrayList<Item> inventory;
-	private ArrayList<Passenger> people;
+	private ArrayList<Passenger> party;
 	private int groupHealth; //increases to indicate poor health
 	private final int MAXWEIGHT = 2400;
 	private int weight;
-	private int foodWeight; //amount of edible food
-	private int numPeople;
 	private int distanceTraveled;
 	private int pace;
 	private int rationLevel;
-	private double money;
+	private int money;
 	private int days;
 	
 	
 	public Wagon() {
-		// TODO Auto-generated constructor stub
-		inventory = new ArrayList<Item>();
-		money=100;
+		money=0;
 		weight=0;
-		foodWeight=0;
-		numPeople=5;
 		groupHealth=0;
 		days=0;
 		
 	}
 	
 	/**
-	 * adds a specified item to the wagons inventory if adding the item wouldn't put the wagon over Max weight, 
-	 * will return false if item wasn't successfully added
-	 * @param item - the item you'ld like to add to wagon's inventory
-	 * @return true if Item was successfully added, false otherwise
+	 * adds a specified item to the wagons inventory
 	 */
-	public boolean addItem(Item item) {
-		
-		if((weight+item.getWeight())<=MAXWEIGHT) {
+	public void addItem(Item item) {
 			inventory.add(item);
 			weight=weight+item.getWeight();
-			if (item instanceof Food && ((Food) item).getNutrition()) foodWeight+=item.getWeight();//checks that item is food and has nutritional value
-			return true;
-		}
-		else return false;
 	}
 	
 	/**
@@ -64,24 +48,56 @@ public class Wagon {
 		
 		inventory.remove(item);
 		weight=weight-item.getWeight();
-		if (item instanceof Food && ((Food) item).getNutrition()) foodWeight-=item.getWeight();
+	}
+	
+	public void restDay() {
+		if (this.hasFoodLeft()) applyFoodEffects(party.size()*rationLevel);
+		days++;
 	}
 	
 	/**
 	 * apply's the appropriate effects to show a wagon traveling a day, adding distance, subtracting food, applying effects on health
 	 */
 	public void travelDay() {
-		distanceTraveled=distanceTraveled+pace;
-		foodWeight=foodWeight-(numPeople*rationLevel);
-		applyHealthEffects();
-		days++;
+				
+			
+		
+			if (this.hasFoodLeft()) applyFoodEffects(party.size()*rationLevel);
+		
+		
+			applyHealthEffects();
+			distanceTraveled=distanceTraveled+pace;
+			days++;
+	}
+	
+	public void applyFoodEffects(int foodAmountNeeded) {
+		if(foodAmountNeeded>this.getFoodLeft()) {
+			
+		}
+		else {
+			while (foodAmountNeeded>0) {
+					Food foodItem = this.getFoodItem();
+				if (foodItem.getWeight() > foodAmountNeeded){
+					foodItem.eatFood(foodAmountNeeded);
+					foodAmountNeeded = 0;
+				}
+				else if (foodItem.getWeight() == foodAmountNeeded) {
+					this.removeItem(foodItem);
+					foodAmountNeeded = 0;
+				}
+				else {
+					foodAmountNeeded -= foodItem.getWeight();
+					this.removeItem(foodItem);
+				}
+			}
+		}
 	}
 	
 	/**
 	 * applies the health effects of having low rations, no food, or extremely poor health
 	 */
 	public void applyHealthEffects() {
-		if(foodWeight==0) groupHealth+=6;
+		if(this.getFoodLeft()==0) groupHealth+=6;
 		else if (rationLevel==2) groupHealth+=2;
 		else if (rationLevel==1) groupHealth+=4;
 		
@@ -90,8 +106,15 @@ public class Wagon {
 		else if (pace==40) groupHealth+=6;
 	
 		if(groupHealth>=140) {
-			Random rand = new Random();
-			people.remove(rand.nextInt(people.size())); //random person is removed when health is too poor, will change to most injured person when implimented
+			int healthCheckNum = -1;
+			int deathIndex = 0;
+			for (int i =0; i<party.size(); i++) {
+				if (party.get(i).getHealthLevel()>healthCheckNum) {
+					healthCheckNum = party.get(i).getHealthLevel();
+					deathIndex = i;
+				}
+			}
+			party.remove(deathIndex);
 		}
 	}
 	
@@ -103,19 +126,20 @@ public class Wagon {
 		return distanceTraveled;
 	}
 	
-	/**
-	 * get's the amount of food left in the wagon
-	 * @return the current amount of food in pounds
-	 */
-	public int getFoodWeight() {
+	public int getFoodLeft() {
+		int foodWeight = 0;
+		for (Item item : inventory) {
+			if (item instanceof Food) foodWeight += item.getWeight(); 
+		}
 		return foodWeight;
 	}
+
 	
 	/**
 	 * get's the amount of money had in the wagon
 	 * @return the current amount of money in the wagon
 	 */
-	public double getMoney() {
+	public int getMoney() {
 		return money;
 	}
 	
@@ -124,23 +148,16 @@ public class Wagon {
 	 * @param item - the item you'ld like to purchase
 	 * @param price - the price of the item
 	 */
-	public boolean buyItem (Item item, double price) {
-		if(addItem(item)&&money>price) {
-			money-=price;
-			return true;
-		}
-		else return false;
-	}
-	
-	public void buyService(double price) {
+	public void buyItem (Item item, int price) {
 		money-=price;
+		this.addItem(item);
 	}
 	
 	/**
 	 * get's the groups health as a string from dying to good
 	 * @return a string describing the current group health
 	 */
-	public String getHealth() {
+	public String getGroupHealth() {
 		if(groupHealth<=34) return "Good";
 		else if(groupHealth<=65) return "Fair";
 		else if(groupHealth<=104) return "Poor";
@@ -149,7 +166,7 @@ public class Wagon {
 	}
 	
 	/**
-	 * set's the pace the wagon travels a day
+	 * 
 	 * @param pace - a value 1-3 that shows the pace you travel a day
 	 */
 	public void setPace(int pace) {
@@ -182,12 +199,21 @@ public class Wagon {
 		return days;
 	}
 	
-	/**
-	 * get's the current inventory of the wagon
-	 * @return the current inventory of the wagon as an ArrayList of Item
-	 */
-	public ArrayList<Item> getInventory(){
-		return inventory;
+	public Food getFoodItem() {
+		for (Item item : inventory) {
+			if (item instanceof Food) return (Food) item;
+		}
+		return null;
+	}
+	
+	public boolean hasFoodLeft() {
+		if (this.getFoodLeft() > 0) return true;
+		else return false;
+	}
+	
+	public boolean isPartyDead() {
+		if(party.isEmpty()) return true;
+		else return false;
 	}
 	
 
