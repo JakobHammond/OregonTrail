@@ -6,6 +6,24 @@ public class Weather {
 	private String currentWeather;
 	private String currentTemp;
 	
+	//distances of "zones" from start
+	int NEBRASKA_DIST = 600;
+	int WYOMING_DIST = 800;
+	int IDAHO_DIST = 1800;
+	int OREGON_DIST = 2200;
+	//average temps for each zone (in degrees Fahrenheit)
+	int KANSAS_TEMP = 79;
+	int NEBRASKA_TEMP = 74;
+	int WYOMING_TEMP = 67;
+	int IDAHO_TEMP = 75;
+	int OREGON_TEMP = 70;
+	//average rainfalls for each zone (in inches per week)
+	double KANSAS_RAIN = 0.824;
+	double NEBRASKA_RAIN = 0.723;
+	double WYOMING_RAIN = 0.237;
+	double IDAHO_RAIN = 0.056;
+	double OREGON_RAIN = 0.169;
+	
 	public Weather(int distanceTraveled) {
 		accumulatedRain = 1;
 		accumulatedSnow = 0;
@@ -15,8 +33,16 @@ public class Weather {
 	
 	public void newCurrentTemp(int distanceTraveled) {
 		//switch based on six zones and distanceTraveled to get avg-temp.
-		int avgTemp = 51;
-		if (distanceTraveled<200) avgTemp = 40; //like this
+		//int avgTemp = 51;
+		
+		int avgTemp;
+		if(distanceTraveled >= OREGON_DIST) avgTemp = OREGON_TEMP;
+		else if(distanceTraveled >= IDAHO_DIST) avgTemp = IDAHO_TEMP;
+		else if(distanceTraveled >= WYOMING_DIST) avgTemp = WYOMING_TEMP;
+		else if(distanceTraveled >= NEBRASKA_DIST) avgTemp = NEBRASKA_TEMP;
+		else avgTemp = KANSAS_TEMP;
+		
+		
 		Random rand = new Random();
 		int actualTemp = rand.nextInt(avgTemp-20,avgTemp+21);
 		if(actualTemp>90) currentTemp = "Very Hot";
@@ -29,8 +55,18 @@ public class Weather {
 	
 	public void newCurrentWeather(int distanceTraveled) {
 		
-		double avgRainfall = 4.8;
-		if(distanceTraveled<200) avgRainfall = 2.4; //Similar to current temperature changes based on "zone".
+		//Similar to current temperature changes based on "zone".
+		//Set average weekly rainfall according to which zone the player is in
+		double avgRainfall;
+		if(distanceTraveled >= OREGON_DIST) avgRainfall = OREGON_RAIN;
+		else if(distanceTraveled >= IDAHO_DIST) avgRainfall = IDAHO_RAIN;
+		else if(distanceTraveled >= WYOMING_DIST) avgRainfall = WYOMING_RAIN;
+		else if(distanceTraveled >= NEBRASKA_DIST) avgRainfall = NEBRASKA_RAIN;
+		else avgRainfall = KANSAS_RAIN;
+		
+		
+		
+		
 		Random rand = new Random();
 		if (rand.nextDouble(10)<avgRainfall) {
 			if(currentTemp=="Cold"||currentTemp=="Very Cold") {
