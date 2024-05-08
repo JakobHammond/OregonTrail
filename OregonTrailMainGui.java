@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.Timer;
@@ -6,24 +7,35 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
 import javax.swing.JTextPane;
+import javax.swing.SwingConstants;
 import javax.swing.JLabel;
 import javax.swing.JButton;
+import javax.swing.JTextField;
+import java.awt.Font;
 
 public class OregonTrailMainGui {
 
-	private JFrame frame;
+	private JFrame baseFrame;
+	private JFrame shopFrame;
+	private JFrame landmarkFrame;
+	private JFrame riverFrame;
+	private JFrame startFrame;
+	private JFrame optionsFrame;
+	private baseMenu baseMenu;
+	private ShopMenu shopMenu;
+	private StartMenu startMenu;
+	private OptionsMenu optionsMenu;
+	private RiverMenu riverMenu;
+	private LandmarkMenu landmarkMenu;
+	private Shop shop;
 	private Wagon wagon = new Wagon();
 	private Weather weather = new Weather(0);
-	private javax.swing.Timer dayTimer;
-	private JLabel weatherLabel;
-	private JLabel dayLabel;
-	private JLabel healthLabel;
-	private JLabel foodLabel;
-	private JLabel milesToLabel;
-	private JLabel milesTraveledLabel;
 	private ArrayList<Landmark> locations;
-	private JButton landmarkButton;
+	private ArrayList<Item> availableItems;
+	
+	
 	
 	
 
@@ -35,7 +47,6 @@ public class OregonTrailMainGui {
 			public void run() {
 				try {
 					OregonTrailMainGui window = new OregonTrailMainGui();
-					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -47,79 +58,98 @@ public class OregonTrailMainGui {
 	 * Create the application.
 	 */
 	public OregonTrailMainGui() {
+		
+		wagon = new Wagon();
+		weather = new Weather(0);
+				 Fort fortWallaWalla = new Fort("Fort Walla Walla", 350);
+				 Landmark blueMountains = new Landmark("Blue Mountains", 2800);
+			     Fort fortBridger = new Fort("Fort Bridger", 1500);
+			     Landmark independenceRock = new Landmark("Independence Rock", 1000);
+			     Landmark southPass = new Landmark("South Pass", 1200);
+			     Fort fortLaramie = new Fort("Fort Laramie", 800);
+			     Landmark theDalles = new Landmark("The Dalles", 3000);
+			     locations = new ArrayList<Landmark>();
+			     locations.add(fortWallaWalla);
+			     locations.add(fortLaramie);
+			     locations.add(independenceRock);
+			     locations.add(southPass);
+			     locations.add(fortBridger);
+			     locations.add(blueMountains);
+			     locations.add(theDalles);
+			     
+			     Food bacon = new Food(200, 0.20, "Bacon");
+			     Food flour = new Food(100, 0.02, "Flour");
+			     Food cornmeal = new Food(100, 0.02, "Cornmeal");
+			     Food rice = new Food(100, 0.06, "Rice");
+			     Food beans = new Food(100, 0.06, "Beans");
+			     Food saltPork = new Food(200, 0.16, "Salt Pork");
+			     Food beef = new Food(200, 0.16, "Beef");
+			     Item boots = new Item(1, 10.00, "Boots");
+			     Item shoes = new Item(1, 5.00, "Shoes");
+			     Item pants = new Item(1, 5.00, "Pants");
+			     Item dresses = new Item(1, 5.00, "Dresses");
+			     Item shirts = new Item(1, 2.00, "Shirts");
+			     Item ammunition = new Item(20, 2.00, "Ammunition");
+			     Item wagonWheel = new Item(1, 10.00, "Wagon Wheel");
+			     Item sparePartsKit = new Item(1, 20.00, "Spare Parts Kit");
+			     Item fishingPole = new Item(1, 2.00, "Fishing Pole");
+			     Item rifle = new Item(1, 20.00, "Rifle");
+			     Item pistol = new Item(1, 10.00, "Pistol");
+			     Item firstAidKit = new Item(1, 5.00, "First Aid Kit");
+			     Item map = new Item(1, 5.00, "Map");
+			     
+			     availableItems = new ArrayList<Item>();
+			     availableItems.add(bacon);
+			     availableItems.add(flour);
+			     availableItems.add(cornmeal);
+			     availableItems.add(rice);
+			     availableItems.add(beans);
+			     availableItems.add(saltPork);
+			     availableItems.add(shoes);
+			     availableItems.add(shirts);
+			     availableItems.add(ammunition);
+			     availableItems.add(wagonWheel);
+			     availableItems.add(firstAidKit);
+			     
+			     shop = new Shop(availableItems);
+			     
+			     
+				
 		initialize();
 		
-		dayTimer = new javax.swing.Timer(1000, new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				passDay(evt);
-			}
-		});
+		optionsMenu = new OptionsMenu(optionsFrame);
+		shopMenu = new ShopMenu(shopFrame);
+		baseMenu = new baseMenu(baseFrame);
+		startMenu = new StartMenu(startFrame);
+		landmarkMenu = new LandmarkMenu(landmarkFrame);
+		riverMenu = new RiverMenu(riverFrame);
 		
-	}
-	
-	public void passDay(ActionEvent evt) {
-		wagon.travelDay();
-		updateLabels();
-		if (locations.get(0).getLocation() < (wagon.getPace()+wagon.getDistance())){
-			wagon.setDistance(locations.get(0).getLocation());
-			reachedLandmark();
-		}
-	}
-	
-	public void reachedLandmark() {
-		landmarkButton.setText("Go to "+ locations.get(0).getLocation());
-		frame.getContentPane().add(landmarkButton);
-		landmarkButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				
-				
-				
-			}
-		});
+		baseMenu.Display(locations.get(0),landmarkFrame,optionsFrame,wagon,weather);
+		shopMenu.Display(shop,wagon,landmarkFrame,baseFrame,false);
+		startMenu.Display(shopFrame);
+		optionsMenu.Display(wagon,baseFrame);
+		startFrame.setVisible(true);
+		
+		
+		
+		
 
-	}
-	
-	public void displayLandmark() {
-		//display that gives options for conversation, shop, cross river
-	}
-	
-	public void displayShop() {
-		// changes frame to frame with shop display on it
-	}
-	
-	public void displayTrade() {
-	
-	}
-	
-	public void displayRiver() {
 		
+		
+		//start display
+		//display shop
+		//then start on trail
+		
+		
+		
+}
+	
+	public void passDay() {
+		wagon.travelDay();
+		weather.WeatherDay(locations.get(0).getLocation());
+		baseMenu.Display(locations.get(0),landmarkFrame,optionsFrame,wagon,weather);
 	}
 	
-	public void removeRiverDisplay() {
-		
-	}
-	
-	public void removeTradeDisplay() {
-		
-	}
-	
-	public void removeLandmarkDisplay() {
-		
-	}
-	
-	public void removeBaseDisplay() {
-		
-	}
-	
-	public void updateLabels() {
-		dayLabel.setText("Days: "+wagon.getDay());
-		healthLabel.setText("Health: "+ wagon.getGroupHealth());
-		foodLabel.setText("Food Left: "+ wagon.getFoodLeft());
-		weatherLabel.setText("Weather: "+ weather.getCurrentTemp() + " and " +weather.getCurrentWeather());
-		milesToLabel.setText("Miles to " + locations.get(0).getName() + ": " + (locations.get(0).getLocation()-wagon.getDistance()));
-		milesTraveledLabel.setText("Miles traveled: "+ wagon.getDistance());
-		
-	}
 	
 	
 
@@ -127,45 +157,42 @@ public class OregonTrailMainGui {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame();
-		frame.setBounds(100, 100, 697, 541);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(null);
+		baseFrame = new JFrame();
+		baseFrame.setBounds(100, 100, 697, 541);
+		baseFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		baseFrame.getContentPane().setLayout(null);
+						
+		startFrame = new JFrame();
+		startFrame.setBounds(100, 100, 697, 541);
+		startFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		startFrame.getContentPane().setLayout(null);
 		
-		JLabel TrailPicLabel = new JLabel();
-		TrailPicLabel.setBounds(152, 6, 539, 360);
-		frame.getContentPane().add(TrailPicLabel);
+		shopFrame = new JFrame();
+		shopFrame.setBounds(100, 100, 697, 541);
+		shopFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		shopFrame.getContentPane().setLayout(null);
 		
-		JButton menuButton = new JButton("Options");
-		menuButton.setBounds(23, 400, 117, 29);
-		frame.getContentPane().add(menuButton);
+		optionsFrame = new JFrame();
+		optionsFrame.setBounds(100, 100, 697, 541);
+		optionsFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		optionsFrame.getContentPane().setLayout(null);
 		
-		dayLabel = new JLabel("Days: ");
-		dayLabel.setBounds(6, 6, 117, 16);
-		frame.getContentPane().add(dayLabel);
+		landmarkFrame = new JFrame();
+		landmarkFrame.setBounds(100, 100, 697, 541);
+		landmarkFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		landmarkFrame.getContentPane().setLayout(null);
 		
-		healthLabel = new JLabel("Health: ");
-		healthLabel.setBounds(6, 34, 61, 16);
-		frame.getContentPane().add(healthLabel);
+		riverFrame = new JFrame();
+		riverFrame.setBounds(100, 100, 697, 541);
+		riverFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		riverFrame.getContentPane().setLayout(null);
 		
-		foodLabel = new JLabel("Food Left: ");
-		foodLabel.setBounds(6, 62, 61, 16);
-		frame.getContentPane().add(foodLabel);
 		
-		weatherLabel = new JLabel("Weather: ");
-		weatherLabel.setBounds(6, 90, 61, 16);
-		frame.getContentPane().add(weatherLabel);
 		
-		milesToLabel = new JLabel("");
-		milesToLabel.setBounds(6, 118, 61, 16);
-		frame.getContentPane().add(milesToLabel);
+	
 		
-		milesTraveledLabel = new JLabel("New label");
-		milesTraveledLabel.setBounds(6, 146, 61, 16);
-		frame.getContentPane().add(milesTraveledLabel);
 		
-		landmarkButton = new JButton();
-		landmarkButton.setBounds(251, 400, 247, 29);
+	
 	
 		
 		/**
